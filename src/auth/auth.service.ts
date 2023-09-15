@@ -21,16 +21,26 @@ export class AuthService {
         return tokens;
     }
 
-    localLogin() {
-
+    async localLogin(dto: AuthDto): Promise<Tokens> {
+        const user = await this.userService.findOneByEmail(dto.email);
+        if (!user) {
+            throw new Error('User not found');
+        }
+        const isPasswordValid = bcrypt.compare(dto.password, user.password);
+        if (!isPasswordValid) {
+            throw new Error('Password is invalid');
+        }
+        const tokens = await this.getTokens(user._id, user.email);
+        await this.updateRefreshToken(user._id, tokens.refresh_token)
+        return tokens;
     }
 
     refreshToken() {
 
     }
 
-    logout() {
-
+    async logout(id: string) {
+        await this.userService.update(id, {refreshToken: null});
     }
 
     async getTokens(id: string, email: string): Promise<Tokens> {

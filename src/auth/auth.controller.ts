@@ -1,7 +1,9 @@
-import {Body, Controller, Delete, Post} from '@nestjs/common';
+import {Body, Controller, Delete, HttpCode, HttpStatus, Post, Req, UseGuards} from '@nestjs/common';
 import {AuthService} from "./auth.service";
 import {AuthDto} from "./dto";
-import {Tokens} from "./types/tokens.type";
+import {Tokens} from "./types";
+import {AuthGuard} from "@nestjs/passport";
+import {Request} from "express";
 
 @Controller('auth')
 export class AuthController {
@@ -10,22 +12,29 @@ export class AuthController {
     }
 
     @Post('local/signup')
+    @HttpCode(HttpStatus.CREATED)
     async localSignup(@Body() dto: AuthDto): Promise<Tokens> {
         return this.authService.localSignup(dto);
     }
 
     @Post('local/login')
-    async localLogin() {
-        return this.authService.localLogin();
+    @HttpCode(HttpStatus.OK)
+    async localLogin(@Body() dto: AuthDto): Promise<Tokens> {
+        return this.authService.localLogin(dto);
     }
 
+    @UseGuards(AuthGuard('jwt-refresh'))
     @Post('refresh')
+    @HttpCode(HttpStatus.OK)
     async refreshToken() {
         return this.authService.refreshToken();
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Delete('logout')
-    async logout() {
-        return this.authService.logout();
+    @HttpCode(HttpStatus.OK)
+    async logout(@Req() req: Request) {
+        const user = req.user;
+        return this.authService.logout(user['id']);
     }
 }
