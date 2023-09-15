@@ -1,4 +1,4 @@
-import {Body, Controller, Delete, HttpCode, HttpStatus, Post, Req, UseGuards} from '@nestjs/common';
+import {Body, Controller, Delete, Get, HttpCode, HttpStatus, Post, Req, UseGuards} from '@nestjs/common';
 import {AuthService} from "./auth.service";
 import {AuthDto} from "./dto";
 import {Tokens} from "./types";
@@ -24,10 +24,11 @@ export class AuthController {
     }
 
     @UseGuards(AuthGuard('jwt-refresh'))
-    @Post('refresh')
+    @Get('refresh')
     @HttpCode(HttpStatus.OK)
-    async refreshToken() {
-        return this.authService.refreshToken();
+    async refreshToken(@Req() req: Request) {
+        const user = req.user;
+        return this.authService.refreshToken(user['id'], user['refreshToken']);
     }
 
     @UseGuards(AuthGuard('jwt'))

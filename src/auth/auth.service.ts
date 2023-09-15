@@ -1,4 +1,4 @@
-import {Injectable} from '@nestjs/common';
+import {ForbiddenException, Injectable} from '@nestjs/common';
 import {UserService} from "../user/user.service";
 import {AuthDto} from "./dto";
 import * as bcrypt from 'bcrypt';
@@ -35,12 +35,25 @@ export class AuthService {
         return tokens;
     }
 
-    refreshToken() {
-
+    async refreshToken(id: string, refreshToken: string) {
+        const user = await this.userService.findOneById(id);
+        if (!user) {
+            throw new ForbiddenException('Access denied');
+        }
+        console.log('refreshToken', refreshToken)
+        console.log('user.refreshToken', user.refreshToken)
+        const isRefreshTokenValid = await bcrypt.compare(refreshToken, user.refreshToken);
+        console.log('isRefreshTokenValid', isRefreshTokenValid)
+        if (!isRefreshTokenValid) {
+            throw new ForbiddenException('Access denied');
+        }
+        const tokens = await this.getTokens(user._id, user.email);
+        await this.updateRefreshToken(user._id, tokens.refresh_token)
+        return tokens;
     }
 
     async logout(id: string) {
-        await this.userService.update(id, {refreshToken: null});
+        await this.userService.update(id, {refreshToken: 'null'});
     }
 
     async getTokens(id: string, email: string): Promise<Tokens> {
