@@ -1,6 +1,7 @@
 import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
 import {Document} from 'mongoose';
 
+// The UserDocument interface is used to define the User schema.
 export type UserDocument = User & Document;
 
 @Schema()

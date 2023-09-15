@@ -7,6 +7,7 @@ type Payload = {
     email: string;
 }
 
+// AtStrategy is a class that extends PassportStrategy and uses the jwt strategy.
 @Injectable()
 export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
     constructor() {
@@ -17,6 +18,7 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
         });
     }
 
+    // The validate() method is called after the token is decoded.
     validate(payload: Payload) {
         return payload;
     }

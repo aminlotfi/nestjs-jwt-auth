@@ -1,5 +1,6 @@
 import {IsEmail, IsNotEmpty, IsString, Matches, MaxLength, MinLength} from "class-validator";
 
+// Data transfer object for authentication
 export class AuthDto {
     @IsNotEmpty()
     @IsString()

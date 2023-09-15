@@ -9,7 +9,7 @@ import {AtGuard} from "./common/guards";
     controllers: [],
     providers: [
         {
-            provide: 'APP_GUARD',
+            provide: 'APP_GUARD', // The APP_GUARD token is used to provide a global guard.
             useClass: AtGuard
         }
     ],

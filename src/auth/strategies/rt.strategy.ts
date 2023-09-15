@@ -3,6 +3,7 @@ import {ExtractJwt, Strategy} from "passport-jwt";
 import {Request} from 'express';
 import {Injectable} from "@nestjs/common";
 
+// RtStrategy is a class that extends PassportStrategy and uses the jwt strategy.
 @Injectable()
 export class RtStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
     constructor() {
@@ -14,6 +15,7 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
         });
     }
 
+    // The validate() method is called after the token is decoded.
     validate(req: Request, payload: any) {
         const refreshToken = req.get('Authorization').split(' ')[1];
         return {
