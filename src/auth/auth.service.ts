@@ -10,7 +10,8 @@ import {Types} from "mongoose";
 export class AuthService {
     constructor(private readonly userService: UserService,
                 private jwtService: JwtService
-    ) {}
+    ) {
+    }
 
     async localSignup(dto: AuthDto): Promise<Tokens> {
         const hashedPassword = this.hashData(dto.password);
@@ -37,13 +38,10 @@ export class AuthService {
 
     async refreshToken(id: string, refreshToken: string) {
         const user = await this.userService.findOneById(id);
-        if (!user) {
+        if (!user || !user.hashedRefreshToken) {
             throw new ForbiddenException('Access denied');
         }
-        console.log('refreshToken', refreshToken)
-        console.log('user.refreshToken', user.refreshToken)
-        const isRefreshTokenValid = await bcrypt.compare(refreshToken, user.refreshToken);
-        console.log('isRefreshTokenValid', isRefreshTokenValid)
+        const isRefreshTokenValid = await bcrypt.compare(refreshToken, user.hashedRefreshToken);
         if (!isRefreshTokenValid) {
             throw new ForbiddenException('Access denied');
         }
@@ -53,7 +51,7 @@ export class AuthService {
     }
 
     async logout(id: string) {
-        await this.userService.update(id, {refreshToken: 'null'});
+        await this.userService.update(id, {hashedRefreshToken: null});
     }
 
     async getTokens(id: string, email: string): Promise<Tokens> {
@@ -82,7 +80,7 @@ export class AuthService {
 
     async updateRefreshToken(id: string, refreshToken: string): Promise<void> {
         const hashedRefreshToken = this.hashData(refreshToken);
-        await this.userService.update(id, {refreshToken: hashedRefreshToken});
+        await this.userService.update(id, {hashedRefreshToken});
     }
 
     hashData(data: string): string {
