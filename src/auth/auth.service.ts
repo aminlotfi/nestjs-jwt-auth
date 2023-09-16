@@ -16,6 +16,11 @@ export class AuthService {
 
     // The localSignup() method creates a new user and returns the tokens.
     async localSignup(dto: AuthDto): Promise<Tokens> {
+        // Check if the user exists by email and throw an error if the user exists.
+        const userExists = await this.userService.findOneByEmail(dto.email);
+        if (userExists) {
+            throw new ForbiddenException('User already exists');
+        }
         const hashedPassword = this.hashData(dto.password);
         const uniqueId = new Types.ObjectId().toHexString();
         // The create() method of the UserService is used to create a new user.
@@ -37,7 +42,7 @@ export class AuthService {
         // The compare() method of the bcrypt library is used to compare the password and the hashed password.
         const isPasswordValid = bcrypt.compare(dto.password, user.password);
         if (!isPasswordValid) {
-            throw new Error('Password is invalid');
+            throw new Error('Password or email is invalid');
         }
         const tokens = await this.getTokens(user._id, user.email);
         await this.updateRefreshToken(user._id, tokens.refresh_token)
